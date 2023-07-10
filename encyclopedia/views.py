@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 
 from . import util
 
@@ -18,3 +18,22 @@ def entry(request, title):
         return render(request, "encyclopedia/error.html", {
             "error": f"Page for {title} doesn't exist yet"
         })
+    
+def search(request):
+    if request.method == "POST":
+        data = request.POST
+        title = data["title"]
+
+        if util.get_entry(title):
+            return redirect("wiki:wiki", title=title)
+        else:
+            entries = util.list_entries()
+            valid = list()
+
+            for entry in entries:
+                if title.lower() in entry.lower():
+                    valid.append(entry)
+
+            return render(request, "encyclopedia/index.html", {
+                "entries": valid
+            })
